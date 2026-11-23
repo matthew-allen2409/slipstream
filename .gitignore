@@ -1,0 +1,9 @@
+build/
+out/
+.cache/
+.idea/
+cmake-build-*/
+compile_commands.json
+CMakeUserPresets.json
+perf.data*
+*.svg.tmp

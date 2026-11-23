@@ -1,0 +1,11 @@
+add_library(slipstream_replay STATIC common/csv_replay.cpp)
+add_library(slipstream::replay ALIAS slipstream_replay)
+target_include_directories(slipstream_replay PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/common")
+target_link_libraries(slipstream_replay PUBLIC slipstream::codec slipstream::net)
+slipstream_configure_target(slipstream_replay)
+
+foreach(client md_client oe_client)
+    add_executable(${client} ${client}/main.cpp)
+    target_link_libraries(${client} PRIVATE slipstream::replay)
+    slipstream_configure_target(${client})
+endforeach()
