@@ -33,4 +33,28 @@ TEST(Symbol, EqualityComparesAllTwelveBytes) {
     EXPECT_NE(Symbol::from_string("SYNTH1"), Symbol::from_string("SYNTH12"));
 }
 
+TEST(Symbol, RejectsEmbeddedNulInName) {
+    using namespace std::string_view_literals;
+    EXPECT_FALSE(Symbol::from_string("AB\0CD"sv).has_value());
+}
+
+TEST(Symbol, FromBytesAcceptsCanonicalPadding) {
+    Symbol::Storage bytes{'S', 'Y', 'N', 'T', 'H', '1'};  // rest zero-filled
+    const auto s = Symbol::from_bytes(bytes);
+    ASSERT_TRUE(s.has_value());
+    EXPECT_EQ(s, Symbol::from_string("SYNTH1"));
+}
+
+TEST(Symbol, FromBytesAcceptsAllPaddingAndFullName) {
+    EXPECT_TRUE(Symbol::from_bytes(Symbol::Storage{}).has_value());
+    const Symbol::Storage full{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
+    EXPECT_TRUE(Symbol::from_bytes(full).has_value());
+}
+
+// "AB\0CD": displays as "AB" but would compare unequal to Symbol "AB".
+TEST(Symbol, FromBytesRejectsDataAfterPadding) {
+    const Symbol::Storage bytes{'A', 'B', '\0', 'C', 'D'};
+    EXPECT_FALSE(Symbol::from_bytes(bytes).has_value());
+}
+
 }  // namespace

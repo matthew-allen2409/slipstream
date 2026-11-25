@@ -1,7 +1,8 @@
 #pragma once
 
-// Decoded, host-order message representations. These are NOT wire layouts (see wire.hpp); the
-// codec translates between the two.
+// Decoded, host-order message representations; the codec translates between these and the wire
+// layout in wire.hpp. Field types must match the wire widths (checked in codec.cpp), and Price and
+// Symbol are copied to the wire as their raw bytes.
 
 #include <cstdint>
 
@@ -27,6 +28,8 @@ struct Quote {
     Price bid_px;
     Qty ask_qty = 0;
     Price ask_px;
+
+    bool operator==(const Quote& other) const noexcept = default;
 };
 
 struct Trade {
@@ -36,15 +39,21 @@ struct Trade {
     Price px;
     Aggressor aggressor = Aggressor::Unknown;
     std::int64_t id = 0;
+
+    bool operator==(const Trade& other) const noexcept = default;
 };
 
 struct Heartbeat {
     std::uint64_t ts_ns = 0;
+
+    bool operator==(const Heartbeat& other) const noexcept = default;
 };
 
 struct SessionControl {
     std::uint64_t ts_ns = 0;
     SessionState state = SessionState::Open;
+
+    bool operator==(const SessionControl& other) const noexcept = default;
 };
 
 struct NewOrder {
@@ -56,6 +65,8 @@ struct NewOrder {
     Side side = Side::Buy;
     Qty qty = 0;
     Price limit_px;
+
+    bool operator==(const NewOrder& other) const noexcept = default;
 };
 
 struct ExecReport {
@@ -65,6 +76,8 @@ struct ExecReport {
     Qty filled_qty = 0;
     Price avg_px;
     std::uint8_t reason_code = 0;
+
+    bool operator==(const ExecReport& other) const noexcept = default;
 };
 
 }  // namespace slipstream::codec

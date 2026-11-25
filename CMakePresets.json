@@ -24,7 +24,8 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -march=native -fno-omit-frame-pointer -DNDEBUG"
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -march=native -fno-omit-frame-pointer -fno-stack-protector -DNDEBUG",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
       }
     },
     {

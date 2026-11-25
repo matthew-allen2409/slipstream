@@ -8,7 +8,7 @@ target_include_directories(slipstream_core INTERFACE "${SLIPSTREAM_INCLUDE_DIR}"
 target_compile_features(slipstream_core INTERFACE cxx_std_23)
 
 # --- codec: GCMD/1 + GCOE/1 wire format (the spec's libslipstream_codec) ----------------------
-add_library(slipstream_codec STATIC codec/frame_parser.cpp)
+add_library(slipstream_codec STATIC codec/codec.cpp codec/frame_parser.cpp)
 add_library(slipstream::codec ALIAS slipstream_codec)
 target_link_libraries(slipstream_codec PUBLIC slipstream::core)
 slipstream_configure_target(slipstream_codec)

@@ -1,10 +1,10 @@
 #pragma once
 
-// 128-bit integer aliases for Σ(px × qty)-style accumulators.
+// 128-bit integer aliases for sum(px * qty) accumulators.
 //
 // __int128 is a GCC/Clang extension; -Wpedantic rejects it unless the declaration is marked
-// __extension__. Bound used by the VWAP accumulators: qty < 2^32 and |px| < 2^63, so a single
-// px × qty term is < 2^95, leaving 2^32 terms of headroom below 2^127.
+// __extension__. Bound: qty < 2^32 and |px| < 2^63, so one px * qty term is < 2^95, leaving room
+// for 2^32 terms below 2^127.
 
 namespace slipstream::core {
 

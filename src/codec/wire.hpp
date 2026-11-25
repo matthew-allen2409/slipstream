@@ -2,21 +2,21 @@
 
 // GCMD/1 (market data) and GCOE/1 (order entry) wire layout.
 //
-// All integers little-endian, structures packed. Offsets are declared explicitly rather than via
-// #pragma pack structs: encode/decode go through std::memcpy at these offsets, which avoids
-// strict-aliasing UB and unaligned access, and makes layout independent of compiler flags.
+// All integers little-endian, no padding. Offsets are listed explicitly rather than expressed as
+// packed structs: encode/decode copy each field with std::memcpy at these offsets, which avoids
+// strict-aliasing UB and unaligned access and keeps the layout independent of compiler flags.
 //
-// SPEC DISCREPANCY: the spec states Trade = 49 bytes and NewOrder = 42 bytes, but their own field
-// tables sum to 41 and 50. The constants below follow the field tables (body_len on the wire is
-// authoritative). See README "Assumptions".
+// Body sizes follow the field tables: Trade = 41 and NewOrder = 50 bytes. (The protocol document's
+// prose gives 49 and 42, which do not match its own tables; body_len on the wire is authoritative.)
 
 #include <cstddef>
 #include <cstdint>
 
+#include "core/symbol.hpp"
+
 namespace slipstream::codec {
 
 inline constexpr std::uint8_t kProtocolVersion = 1;
-inline constexpr std::size_t kSymbolSize = 12;
 
 enum class MsgType : std::uint8_t {
     // GCMD/1
@@ -45,6 +45,7 @@ inline constexpr std::size_t bid_px = 24;   // int64
 inline constexpr std::size_t ask_qty = 32;  // uint32
 inline constexpr std::size_t ask_px = 36;   // int64
 inline constexpr std::size_t kSize = 44;
+static_assert(ts_ns == symbol + core::Symbol::kSize);
 static_assert(ask_px + sizeof(std::int64_t) == kSize);
 }  // namespace quote
 
@@ -55,7 +56,8 @@ inline constexpr std::size_t qty = 20;       // uint32
 inline constexpr std::size_t px = 24;        // int64
 inline constexpr std::size_t aggressor = 32; // char: 'B', 'S', '?'
 inline constexpr std::size_t id = 33;        // int64
-inline constexpr std::size_t kSize = 41;     // spec text says 49; field table sums to 41
+inline constexpr std::size_t kSize = 41;
+static_assert(ts_ns == symbol + core::Symbol::kSize);
 static_assert(id + sizeof(std::int64_t) == kSize);
 }  // namespace trade
 
@@ -81,7 +83,8 @@ inline constexpr std::size_t trade_id = 29;        // int64
 inline constexpr std::size_t side = 37;            // char: 'B' / 'S'
 inline constexpr std::size_t qty = 38;             // uint32
 inline constexpr std::size_t limit_px = 42;        // int64
-inline constexpr std::size_t kSize = 50;           // spec text says 42; field table sums to 50
+inline constexpr std::size_t kSize = 50;
+static_assert(status == symbol + core::Symbol::kSize);
 static_assert(limit_px + sizeof(std::int64_t) == kSize);
 }  // namespace new_order
 

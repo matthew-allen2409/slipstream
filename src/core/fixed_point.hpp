@@ -17,6 +17,9 @@ struct Price {
     friend constexpr auto operator<=>(Price, Price) noexcept = default;
 };
 
+// The codec copies a Price to the wire directly as its int64 raw value.
+static_assert(sizeof(Price) == sizeof(std::int64_t));
+
 using Qty = std::uint32_t;
 
 // Display only. Never feed the result back into a calculation.
