@@ -5,8 +5,6 @@
 
 namespace slipstream::core {
 
-// Prices are signed 64-bit fixed point scaled by 10'000: 101.2500 is stored as 1'012'500.
-// No floating point anywhere in accumulation or decisions; to_display() exists for humans only.
 inline constexpr std::int64_t kPriceScale = 10'000;
 
 struct Price {
@@ -17,9 +15,11 @@ struct Price {
     friend constexpr auto operator<=>(Price, Price) noexcept = default;
 };
 
+// The codec copies Price to and from the wire as raw bytes.
+static_assert(sizeof(Price) == sizeof(std::int64_t));
+
 using Qty = std::uint32_t;
 
-// Display only. Never feed the result back into a calculation.
 [[nodiscard]] constexpr double to_display(Price p) noexcept {
     return static_cast<double>(p.raw) / static_cast<double>(kPriceScale);
 }

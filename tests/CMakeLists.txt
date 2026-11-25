@@ -5,6 +5,8 @@ target_include_directories(slipstream_alloc_guard PUBLIC "${CMAKE_CURRENT_SOURCE
 slipstream_configure_target(slipstream_alloc_guard)
 
 add_executable(slipstream_tests
+    codec/byte_io_test.cpp
+    codec/codec_test.cpp
     codec/wire_test.cpp
     core/fixed_point_test.cpp
     core/int128_test.cpp
