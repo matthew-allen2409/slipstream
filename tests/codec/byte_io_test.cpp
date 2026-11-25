@@ -11,8 +11,9 @@
 
 // Expected API (src/codec/byte_io.hpp, namespace slipstream::codec):
 //
-//   template <class T> void store_le(std::span<std::byte> buf, std::size_t offset, T value) noexcept;
-//   template <class T> T    load_le(std::span<const std::byte> buf, std::size_t offset) noexcept;
+//   template <class T> void store_le(std::span<std::byte> buf, std::size_t offset, T value)
+//   noexcept; template <class T> T    load_le(std::span<const std::byte> buf, std::size_t offset)
+//   noexcept;
 //
 // T is a fixed-width integer or char. The caller guarantees offset + sizeof(T) <= buf.size().
 

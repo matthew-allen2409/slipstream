@@ -1,5 +1,9 @@
 #pragma once
 
+// Decoded, host-order message representations; the codec translates between these and the wire
+// layout in wire.hpp. Field types must match the wire widths (checked in codec.cpp), and Price and
+// Symbol are copied to the wire as their raw bytes.
+
 #include <cstdint>
 
 #include "core/fixed_point.hpp"
