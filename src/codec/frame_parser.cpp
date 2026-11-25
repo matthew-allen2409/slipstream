@@ -12,12 +12,14 @@ namespace slipstream::codec {
 
 namespace {
 
+/// @brief Decoded frame header fields.
 struct Header {
-    std::uint16_t body_len;
-    MsgType msg_type;
-    std::uint8_t version;
+    std::uint16_t body_len;  ///< Body length, excluding the header.
+    MsgType msg_type;        ///< Message type (not yet validated).
+    std::uint8_t version;    ///< Protocol version (not yet validated).
 };
 
+/// @brief Reads the header fields; performs no validation.
 Header read_header(std::span<const std::byte, header::kSize> bytes) noexcept {
     return Header{
         .body_len = load_le<decltype(Header::body_len)>(bytes, header::body_len),

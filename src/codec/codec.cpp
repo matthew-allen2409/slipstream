@@ -56,64 +56,76 @@ static_assert(sizeof(ExecReport::reason_code) == exec_report::kSize - exec_repor
 // The header's body_len is a uint16.
 static_assert(kMaxBodySize <= UINT16_MAX);
 
-// ---- per-message wire facts
-// ----------------------------------------------------------------------- One place that ties each
-// message struct to its msg_type and body size, so the shared encode prologue below cannot pair a
-// type with the wrong size.
+// ---- per-message wire facts --------------------------------------------------------------------
 
+/// @brief Ties each message struct to its msg_type, so the shared encode prologue below cannot
+///        pair a type with the wrong header.
 template <class M>
 struct WireTraits;
 
 template <>
 struct WireTraits<Quote> {
     static constexpr MsgType type = MsgType::Quote;
-    static constexpr std::size_t body_size = quote::kSize;
 };
 template <>
 struct WireTraits<Trade> {
     static constexpr MsgType type = MsgType::Trade;
-    static constexpr std::size_t body_size = trade::kSize;
 };
 template <>
 struct WireTraits<Heartbeat> {
     static constexpr MsgType type = MsgType::Heartbeat;
-    static constexpr std::size_t body_size = heartbeat::kSize;
 };
 template <>
 struct WireTraits<SessionControl> {
     static constexpr MsgType type = MsgType::SessionControl;
-    static constexpr std::size_t body_size = session_control::kSize;
 };
 template <>
 struct WireTraits<NewOrder> {
     static constexpr MsgType type = MsgType::NewOrder;
-    static constexpr std::size_t body_size = new_order::kSize;
 };
 template <>
 struct WireTraits<ExecReport> {
     static constexpr MsgType type = MsgType::ExecReport;
-    static constexpr std::size_t body_size = exec_report::kSize;
 };
 
+/// @brief Body size of message @p M.
+///
+/// Comes from expected_body_size(), the same table the frame parser checks body_len against, so
+/// encoder and parser cannot disagree about a message's size.
 template <class M>
-inline constexpr std::size_t kFrameSize = header::kSize + WireTraits<M>::body_size;
+inline constexpr std::size_t kBodySize = expected_body_size(WireTraits<M>::type);
 
-// Shared encode prologue: checks that the whole frame fits, writes the header, and returns the
-// span the body goes into. Nothing is written when the buffer is too small.
+/// @brief Full frame size (header + body) of message @p M.
+template <class M>
+inline constexpr std::size_t kFrameSize = header::kSize + kBodySize<M>;
+
+/// @brief Every message has a known size, and kMaxBodySize (which sizes FrameParser's buffer)
+///        covers it.
+///
+/// Catches a new message whose size was added to expected_body_size() but not to kMaxBodySize.
+template <class... Ms>
+constexpr bool kSizesCovered = ((kBodySize<Ms> != 0 && kBodySize<Ms> <= kMaxBodySize) && ...);
+static_assert(kSizesCovered<Quote, Trade, Heartbeat, SessionControl, NewOrder, ExecReport>);
+
+/// @brief Shared encode prologue: checks that the whole frame fits and writes the header.
+/// @return The span the body goes into, or BufferTooSmall (nothing is written in that case).
 template <class M>
 std::expected<std::span<std::byte>, EncodeError> begin_frame(std::span<std::byte> out) noexcept {
     if (out.size() < kFrameSize<M>) [[unlikely]] {
         return std::unexpected{EncodeError::BufferTooSmall};
     }
 
-    store_le(out, header::body_len, static_cast<std::uint16_t>(WireTraits<M>::body_size));
+    store_le(out, header::body_len, static_cast<std::uint16_t>(kBodySize<M>));
     store_le(out, header::msg_type, std::to_underlying(WireTraits<M>::type));
     store_le(out, header::version, kProtocolVersion);
 
-    return out.subspan(header::kSize, WireTraits<M>::body_size);
+    return out.subspan(header::kSize, kBodySize<M>);
 }
 
-// Symbols go through Symbol::from_bytes so a decoded Symbol is always canonical (see symbol.hpp).
+/// @brief Reads a Symbol at @p offset in @p body.
+///
+/// Goes through Symbol::from_bytes so a decoded Symbol is always canonical (see symbol.hpp).
+/// @return nullopt if the bytes are not a canonical symbol.
 std::optional<Symbol> read_symbol(std::span<const std::byte> body, std::size_t offset) noexcept {
     return Symbol::from_bytes(load_le<Symbol::Storage>(body, offset));
 }
