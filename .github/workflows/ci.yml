@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same branch/PR cancels the run it supersedes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: ${{ matrix.preset }}
+    # Pinned rather than ubuntu-latest so the toolchain doesn't move under us.
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [debug, asan-ubsan]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends g++-14 ninja-build
+
+      # Ubuntu 24.04 runners use mmap_rnd_bits=32, which breaks ASan's shadow memory mapping.
+      - name: Lower ASLR entropy for ASan
+        if: matrix.preset == 'asan-ubsan'
+        run: sudo sysctl vm.mmap_rnd_bits=28
+
+      # The presets say "g++"; on 24.04 that is GCC 13, so pin GCC 14 explicitly.
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }}

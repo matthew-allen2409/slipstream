@@ -1,5 +1,7 @@
 # Slipstream
 
+[![CI](https://github.com/matthew-allen2409/slipstream/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/matthew-allen2409/slipstream/actions/workflows/ci.yml)
+
 A single-instrument, volume-aware execution engine written in C++23.
 
 ## What it is
