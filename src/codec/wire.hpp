@@ -99,7 +99,7 @@ inline constexpr std::size_t kSize = 30;
 static_assert(reason_code + sizeof(std::uint8_t) == kSize);
 }  // namespace exec_report
 
-// Largest body of any known message; sizes the parser's scratch space.
+// Largest body of any known message. FrameParser's buffer must hold at least one full frame.
 inline constexpr std::size_t kMaxBodySize = new_order::kSize;
 
 // Exact body length for a message type, or 0 if the type is unknown.
