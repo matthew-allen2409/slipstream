@@ -1,10 +1,11 @@
 #pragma once
 
-// Encoders and decoders for every GCMD/1 and GCOE/1 message.
-//
-// encode() writes header + body into a caller-supplied buffer and returns the bytes written, so
-// nothing allocates. decode_*() take the BODY only: the frame parser has already read the header
-// and used msg_type to choose the decoder.
+/// @file
+/// @brief Encoders and decoders for every GCMD/1 and GCOE/1 message.
+///
+/// encode() writes header + body into a caller-supplied buffer and returns the bytes written, so
+/// nothing allocates. decode_*() take the BODY only: the frame parser has already read the header
+/// and used msg_type to choose the decoder.
 
 #include <cstddef>
 #include <expected>
@@ -16,6 +17,10 @@
 
 namespace slipstream::codec {
 
+/// @name Encoders
+/// Each writes a full frame (header + body) to the front of the output buffer.
+/// @return Bytes written, or EncodeError::BufferTooSmall (in which case nothing is written).
+/// @{
 [[nodiscard]] std::expected<std::size_t, EncodeError> encode(const Quote&,
                                                              std::span<std::byte>) noexcept;
 [[nodiscard]] std::expected<std::size_t, EncodeError> encode(const Trade&,
@@ -28,7 +33,13 @@ namespace slipstream::codec {
                                                              std::span<std::byte>) noexcept;
 [[nodiscard]] std::expected<std::size_t, EncodeError> encode(const ExecReport&,
                                                              std::span<std::byte>) noexcept;
+/// @}
 
+/// @name Decoders
+/// Each decodes a message body (header already stripped).
+/// @return The message, or BadBodyLen if the body is the wrong size, or BadField if a field holds
+///         an invalid value.
+/// @{
 [[nodiscard]] std::expected<Quote, DecodeError> decode_quote(
     std::span<const std::byte> body) noexcept;
 [[nodiscard]] std::expected<Trade, DecodeError> decode_trade(
@@ -41,9 +52,12 @@ namespace slipstream::codec {
     std::span<const std::byte> body) noexcept;
 [[nodiscard]] std::expected<ExecReport, DecodeError> decode_exec_report(
     std::span<const std::byte> body) noexcept;
+/// @}
 
-// decode<Quote>(body) == decode_quote(body). C++ cannot overload on return type alone, so this
-// gives generic code (the frame parser's dispatch, tests) one name to call by message type.
+/// @brief Decodes a body as message type @p M; decode<Quote>(body) == decode_quote(body).
+///
+/// C++ cannot overload on return type alone, so this gives generic code (the frame parser's
+/// dispatch, tests) one name to call by message type.
 template <class M>
 [[nodiscard]] std::expected<M, DecodeError> decode(std::span<const std::byte> body) noexcept {
     if constexpr (std::is_same_v<M, Quote>) {

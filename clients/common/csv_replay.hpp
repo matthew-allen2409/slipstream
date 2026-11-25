@@ -1,21 +1,25 @@
 #pragma once
 
+/// @file
+/// @brief Shared helpers for the CSV replay clients.
+
 #include <cstdint>
 #include <string>
 #include <string_view>
 
 namespace slipstream::replay {
 
-// Shared CLI options for both replay clients.
+/// @brief Shared CLI options for both replay clients.
 struct ClientOptions {
-    std::string csv_path = "data/QandT.csv";
-    std::string host = "127.0.0.1";
-    std::uint16_t port = 0;
+    std::string csv_path = "data/QandT.csv";  ///< Replay file.
+    std::string host = "127.0.0.1";           ///< slipstream address.
+    std::uint16_t port = 0;                   ///< slipstream port.
 };
 
-// Returns true if --help / -h was passed.
+/// @brief Returns true if --help / -h was passed.
 [[nodiscard]] bool wants_help(int argc, char** argv) noexcept;
 
+/// @brief The options section of the clients' `--help` text.
 [[nodiscard]] std::string_view client_usage() noexcept;
 
 // TODO(M1): CSV reader (skip '#' rows and the header), decimal -> fixed point without floats,
