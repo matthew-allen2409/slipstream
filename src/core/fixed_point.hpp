@@ -14,6 +14,9 @@ namespace slipstream::core {
 /// to_display() exists for humans only.
 inline constexpr std::int64_t kPriceScale = 10'000;
 
+/// @brief Decimal places in a Price. kPriceScale == 10^kPriceDecimals (checked in parse_fixed.hpp).
+inline constexpr unsigned kPriceDecimals = 4;
+
 /// @brief A fixed-point price in units of 1 / kPriceScale.
 struct Price {
     std::int64_t raw = 0;  ///< Scaled integer value.
