@@ -5,6 +5,7 @@ target_include_directories(slipstream_alloc_guard PUBLIC "${CMAKE_CURRENT_SOURCE
 slipstream_configure_target(slipstream_alloc_guard)
 
 add_executable(slipstream_tests
+    clients/csv_reader_test.cpp
     codec/byte_io_test.cpp
     codec/codec_test.cpp
     codec/frame_parser_test.cpp
@@ -22,6 +23,7 @@ target_link_libraries(slipstream_tests PRIVATE
     slipstream::engine
     slipstream::net
     slipstream::perf
+    slipstream::replay
     GTest::gtest_main)
 slipstream_configure_target(slipstream_tests)
 
