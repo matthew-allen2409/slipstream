@@ -11,6 +11,7 @@ add_executable(slipstream_tests
     codec/wire_test.cpp
     core/fixed_point_test.cpp
     core/int128_test.cpp
+    core/parse_fixed_test.cpp
     core/symbol_test.cpp
     net/fd_test.cpp
     support/alloc_guard_test.cpp)
